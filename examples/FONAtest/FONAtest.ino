@@ -45,9 +45,9 @@ SoftwareSerial *fonaSerial = &fonaSS;
 //  HardwareSerial *fonaSerial = &Serial1;
 
 // Use this for FONA 800 and 808s
-//Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
+Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 // Use this one for FONA 3G
-Adafruit_FONA_3G fona = Adafruit_FONA_3G(FONA_RST);
+//Adafruit_FONA_3G fona = Adafruit_FONA_3G(FONA_RST);
 
 uint8_t readline(char *buff, uint8_t maxbuff, uint16_t timeout = 0);
 
@@ -752,12 +752,16 @@ void loop() {
       }
 
     case 'W': {
+      /*
+       * Our URL to post to is:
+       * https://viper.response.epa.gov/CAP/post
+       */ 
         // Post data to website
         uint16_t statuscode;
         int16_t length;
         char url[80];
         char data[80];
-
+       
         flushSerial();
         Serial.println(F("NOTE: in beta! Use simple websites to post!"));
         Serial.println(F("URL to post (e.g. httpbin.org/post):"));
