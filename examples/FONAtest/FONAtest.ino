@@ -102,7 +102,7 @@ void setup() {
   // Optionally configure HTTP gets to follow redirects over SSL.
   // Default is not to follow SSL redirects, however if you uncomment
   // the following line then redirects over SSL will be followed.
-  //fona.setHTTPSRedirect(true);
+  fona.setHTTPSRedirect(true);
 
   printMenu();
 }
