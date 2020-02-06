@@ -755,20 +755,79 @@ void loop() {
       /*
        * Our URL to post to is:
        * https://viper.response.epa.gov/CAP/post
+       * The POST test is to use this with this URL posted here.
+       * 
        */ 
+       /*
+        * Example of XML format here!
+        * <?xml version="1.0" encoding="utf-16"?><alert
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-
+instance"
+
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns="urn:oasis:names:tc:emergency:cap:1.1"><identi
+fier>281005951_634498074648864996</identifier><sende
+r>Leakwise</sender><sent>2011-08-19T15:31:03-
+04:00</sent><status>Actual</status><msgType>Alert</m
+sgType><source>Leakwise,Leakwise.xml,000000000000,00
+0000000000</source><scope>Public</scope><info><urgen
+cy>Immediate</urgency><severity>Extreme</severity><c
+ertainty>Observed</certainty><headline>Msg
+Header;1)12:31 Leakwise ERT
+Leakwise;;Transparent;Medium;Oil;;Yellow;sig;892;uA;
+Yellow;Oil
+Thickness;25;mm;Yellow;Battery;11.9;V;Green</headlin
+e></info></alert> 
+        */
+        
         // Post data to website
         uint16_t statuscode;
         int16_t length;
+        int16_t data_length
         char url[80];
-        char data[80];
-       
+        char data[1000];  // changed data from 79 to 1000 because theres a LOT (as in tons) of data in that string
+        char header[500];
+
+       /* How to use sprintf to build a string 
+        *  Buffer is an array
+        *  n=sprintf (buffer, "%d plus %d is %d", a, b, a+b);
+        *  where a and b are integers
+        *  n stores how long the string is
+        */
         flushSerial();
         Serial.println(F("NOTE: in beta! Use simple websites to post!"));
         Serial.println(F("URL to post (e.g. httpbin.org/post):"));
-        Serial.print(F("http://")); readline(url, 79);
+        Serial.print(F("https://viper.response.epa.gov/CAP/post")); readline(url, 79);  //39 characters long
         Serial.println(url);
-        Serial.println(F("Data to post (e.g. \"foo\" or \"{\"simple\":\"json\"}\"):"));
-        readline(data, 79);
+        /*
+         * XML DATA SETUP BY TIM
+         *char allData[3000];
+          char str_values[10];
+          char postS[500];
+          char tempS[100];
+          char ident[25];
+          char sourceS[30];
+          char footer[30];
+          char header[500];
+
+          sprintf(ident,"%i",identnum);
+          ++identnum;
+
+          sprintf(postS,"%s","");
+          sprintf(tempS,"%s","");
+
+          sprintf(sourceS, "%s%i%s", "EPA-BOSS,BOSS",unit, ",0,0");
+          sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>", GPS, "</circle></area><headline>");
+   
+          sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-16\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
+          sprintf(footer,"%s","</headline></info></alert>");
+
+         * 
+         * 
+         * 
+         */
+        Serial.println(F("Data to post (e.g. \"foo\" or \"{\"simple\":\"json\"}\"):"));  //XML post here
+       // readline(data, 79);
         Serial.println(data);
 
         Serial.println(F("****"));
