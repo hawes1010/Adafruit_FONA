@@ -30,6 +30,7 @@ the commented section below at the end of the setup() function.
 #define FONA_RX 2
 #define FONA_TX 3
 #define FONA_RST 4
+static int identnum = 1;
 
 // this is a large buffer for replies
 char replybuffer[255];
@@ -783,11 +784,10 @@ e></info></alert>
         // Post data to website
         uint16_t statuscode;
         int16_t length;
-        int16_t data_length
+        int16_t data_length;
         char url[80];
         char data[1000];  // changed data from 79 to 1000 because theres a LOT (as in tons) of data in that string
-        char header[500];
-
+      
        /* How to use sprintf to build a string 
         *  Buffer is an array
         *  n=sprintf (buffer, "%d plus %d is %d", a, b, a+b);
@@ -800,6 +800,7 @@ e></info></alert>
         Serial.print(F("https://viper.response.epa.gov/CAP/post")); readline(url, 79);  //39 characters long
         Serial.println(url);
         /*
+         * 
          * XML DATA SETUP BY TIM
          *char allData[3000];
           char str_values[10];
@@ -809,23 +810,46 @@ e></info></alert>
           char sourceS[30];
           char footer[30];
           char header[500];
-
+      
           sprintf(ident,"%i",identnum);
           ++identnum;
-
           sprintf(postS,"%s","");
           sprintf(tempS,"%s","");
-
-          sprintf(sourceS, "%s%i%s", "EPA-BOSS,BOSS",unit, ",0,0");
+          sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD # ",unit, ",0,0");
           sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>", GPS, "</circle></area><headline>");
-   
           sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-16\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
           sprintf(footer,"%s","</headline></info></alert>");
-
          * 
          * 
          * 
          */
+          char allData[3000];
+          char str_values[10];
+          char postS[500];
+          char tempS[100];
+          char ident[25];
+          char sourceS[30];
+          char footer[30];
+          char header[500];
+
+
+         int unit = 1;
+          sprintf(ident,"%i",identnum);
+          ++identnum;
+          sprintf(postS,"%s","");
+          sprintf(tempS,"%s","");
+          sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD # ",unit, ",0,0");                                                                                          
+          sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>",0/*GPS*/, "</circle></area><headline>");
+          sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-16\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
+          sprintf(footer,"%s","</headline></info></alert>");
+
+
+
+
+
+
+
+          
         Serial.println(F("Data to post (e.g. \"foo\" or \"{\"simple\":\"json\"}\"):"));  //XML post here
        // readline(data, 79);
         Serial.println(data);
