@@ -869,11 +869,13 @@ void loop() {
   fona.println("AT+CHTTPSSTART");
 
  
-char post[] =  "POST /CAP/post HTTP/1.1";
-char host[] = "Host: https://viper.response.epa.gov/CAP/post";
-char connection[] = "Connection: Keep-Alive";
-char authorization[] = "Authorization: Basic Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh"; //encoded my username and password in base 64
+char post[] =  "POST /CAP/post HTTP/1.1\r";
+char host[] = "Host: https://viper.response.epa.gov/CAP/post\r";
+char connection[] = "Connection: Keep-Alive\r";
+char authorization[] = "Authorization: Basic Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh\r"; //encoded my username and password in base 64
 char xml[1000];
+char http_header[300];
+
  char allData[3000];
           char str_values[10];
           char postS[500];
@@ -893,7 +895,8 @@ int unit = 1;
         sprintf(footer,"%s","</headline></info></alert>");
         count = sprintf(allData,"%s%s%s",header,postS,footer);
         char content_length[30];
-        sprintf(content_length,"Content-length: %s", count); 
+        sprintf(content_length,"Content-length: %s\r", count);
+        sprintf(http_header, "%s%s%s%s%s", post,host,connection,authorization,content_length);
 /* 
         *  How to use sprintf to build a string 
         *  Buffer is an array
