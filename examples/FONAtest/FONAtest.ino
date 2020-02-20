@@ -895,27 +895,20 @@ char xml[1000];
           char str_values[10];
           char postS[500];
           char tempS[100];
-          char ident[25];
+         static char ident[25];
           char sourceS[30];
           char footer[30];
           char header[500];
 int unit = 1;
-         int count0;
-         int count1;
-         int count2;
-         int count3;
-         int count4;
-         int count5;
-         int count6;
-       count0 =sprintf(ident,"%i",identnum);
+         int count;
+         
+        sprintf(ident,"%i",identnum);
           ++identnum;
-        count0 +=  sprintf(postS,"%s","");
-       count0  +=   sprintf(tempS,"%s","");
-        count0 +=  sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD ",unit, ",0,0");  // Can change the zeros to increment in a cascading format to add more devices                                                                         
-        count0 +=  sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>",0/*GPS*/, "</circle></area><headline>");
-        count0 +=  sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-8\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
-        count0 +=  sprintf(footer,"%s","</headline></info></alert>");
-        int total_length = count0;
+        sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD ",unit, ",0,0");  // Can change the zeros to increment in a cascading format to add more devices                                                                         
+        sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>",0/*GPS*/, "</circle></area><headline>");
+        sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-8\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
+        sprintf(footer,"%s","</headline></info></alert>");
+        count = sprintf(allData,"%s%s%s",header,postS,footer);
 /* 
         *  How to use sprintf to build a string 
         *  Buffer is an array
