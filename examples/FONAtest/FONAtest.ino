@@ -26,7 +26,7 @@ Note that if you need to set a GPRS APN, username, and password scroll down to
 the commented section below at the end of the setup() function.
 */
 #include "Adafruit_FONA.h"
-
+#include "base64.hpp"
 #define FONA_RX 2
 #define FONA_TX 3
 #define FONA_RST 4
@@ -156,6 +156,7 @@ void printMenu(void) {
   Serial.println(F("[l] Query GSMLOC (GPRS)"));
   Serial.println(F("[w] Read webpage (GPRS)"));
   Serial.println(F("[W] Post to website (GPRS)"));
+   Serial.println(F("[Z] Post to website (TestMode!)"));
 
   // GPS
   if ((type == FONA3G_A) || (type == FONA3G_E) || (type == FONA808_V1) || (type == FONA808_V2)) {
@@ -761,26 +762,16 @@ void loop() {
        */ 
        /*
         * Example of XML format here!
-        * <?xml version="1.0" encoding="utf-16"?><alert
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-
-instance"
-
-xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-xmlns="urn:oasis:names:tc:emergency:cap:1.1"><identi
-fier>281005951_634498074648864996</identifier><sende
-r>Leakwise</sender><sent>2011-08-19T15:31:03-
-04:00</sent><status>Actual</status><msgType>Alert</m
-sgType><source>Leakwise,Leakwise.xml,000000000000,00
-0000000000</source><scope>Public</scope><info><urgen
-cy>Immediate</urgency><severity>Extreme</severity><c
-ertainty>Observed</certainty><headline>Msg
-Header;1)12:31 Leakwise ERT
-Leakwise;;Transparent;Medium;Oil;;Yellow;sig;892;uA;
-Yellow;Oil
-Thickness;25;mm;Yellow;Battery;11.9;V;Green</headlin
-e></info></alert> 
+        * <?xml version="1.0" encoding="utf-16"?><alert xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        * xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        * xmlns="urn:oasis:names:tc:emergency:cap:1.1"><identifier>281005951_634498074648864996</identifier>
+        * <sender>Leakwise</sender><sent>2011-08-19T15:31:03-04:00
+        * </sent><status>Actual</status><msgType>Alert</msgType><source>Leakwise,Leakwise.xml,000000000000,000000000000</source>
+        * <scope>Public</scope><info><urgency>Immediate</urgency>
+        * <severity>Extreme</severity><certainty>Observed</certainty>
+        * <headline>MsgHeader;1)12:31 Leakwise ERTLeakwise;;Transparent;Medium;Oil;;Yellow;sig;892;uA;Yellow;OilThickness;25;mm;Yellow;Battery;11.9;V;Green</headline></info></alert> 
         */
-        
+
         // Post data to website
         uint16_t statuscode;
         int16_t length;
@@ -801,27 +792,6 @@ e></info></alert>
         Serial.println(url);
         /*
          * 
-         * XML DATA SETUP BY TIM
-         *char allData[3000];
-          char str_values[10];
-          char postS[500];
-          char tempS[100];
-          char ident[25];
-          char sourceS[30];
-          char footer[30];
-          char header[500];
-      
-          sprintf(ident,"%i",identnum);
-          ++identnum;
-          sprintf(postS,"%s","");
-          sprintf(tempS,"%s","");
-          sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD # ",unit, ",0,0");
-          sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>", GPS, "</circle></area><headline>");
-          sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-16\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
-          sprintf(footer,"%s","</headline></info></alert>");
-         * 
-         * 
-         * 
          */
           char allData[3000];
           char str_values[10];
@@ -838,13 +808,12 @@ e></info></alert>
           ++identnum;
           sprintf(postS,"%s","");
           sprintf(tempS,"%s","");
-          sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD # ",unit, ",0,0");                                                                                          
+          sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD ",unit, ",0,0");  // Can change the zeros to increment in a cascading format to add more devices                                                                         
           sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>",0/*GPS*/, "</circle></area><headline>");
-          sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-16\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
+          sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-8\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
           sprintf(footer,"%s","</headline></info></alert>");
 
-
-
+ 
 
 
 
@@ -878,7 +847,100 @@ e></info></alert>
         fona.HTTP_POST_end();
         break;
       }
+     
     /*****************************************/
+
+
+
+   case 'Z': {
+    /*
+Suggested Code Sequence from Adafruit for opening a http connection.
+AT+CGDCONT=1,\"IP\",\"<YOUR APN HERE>\",\"0.0.0.0\" // Define PDP context
+AT+CGSOCKCONT=1,\"IP\",\"<YOUR APN HERE>\" // Define PCP socket context
+AT+NETOPEN // Open packet data network
+AT+CHTTPSSTART // Aquire HTTPS stack
+AT+CHTTPSOPSE=\"<YOUR SITE HERE>\",443 // Open HTTPS session
+AT+HTTPSSEND=<LENGTH OF REQUEST> // Tell the SIMCOM you want to send a message of certain length
+GET /url/ HTTP/1.1
+Host: <YOUR SITE>
+// (Any other list of http parameters you want) 
+// Make sure that the length of the request matches what you stated above. 
+AT+CHTTPSSEND // Tell the SIMCOM to send the message.
+// Wait for this from the module
++CHTTPS: RECV EVENT
+AT+CHTTPSRECV=<length> // Check the response. <length> defines how long the printout is. I normally say something like 1000 and just ignore the garbage. 
+*/
+// turn HTTPS Stack on
+
+  // turn GPRS on
+  if (!fona.enableGPRS(true))
+    Serial.println(F("Failed to turn on the 3G GPRS module"));
+  else
+    Serial.println(F("We have turned on the GPRS Function for the 3G FONA module"));
+
+  Serial.println(F("Starting the HTTPS Stack!"));
+  fona.println("AT+CHTTPSSTART");
+
+  
+//https://viper.response.epa.gov/CAP/post
+//fona.write("AT+CHTTPSOPSE=https://viper.response.epa.gov/CAP/post,,2");
+//fona.write("AT+CHTTPSSEND=1000");
+//fona.write("AT+CHTTPSSEND");
+char post[] =  "POST /CAP/post HTTP/1.1";
+char host[] = "https://viper.response.epa.gov/CAP/post";
+char connection[] = "Connection: Keep-Alive";
+char authorization[] = "Authorization: Basic Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh"; //encoded my username and password in base 64
+char xml[1000];
+ char allData[3000];
+          char str_values[10];
+          char postS[500];
+          char tempS[100];
+          char ident[25];
+          char sourceS[30];
+          char footer[30];
+          char header[500];
+int unit = 1;
+         int count0;
+         int count1;
+         int count2;
+         int count3;
+         int count4;
+         int count5;
+         int count6;
+       count0 =sprintf(ident,"%i",identnum);
+          ++identnum;
+        count0 +=  sprintf(postS,"%s","");
+       count0  +=   sprintf(tempS,"%s","");
+        count0 +=  sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD ",unit, ",0,0");  // Can change the zeros to increment in a cascading format to add more devices                                                                         
+        count0 +=  sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>",0/*GPS*/, "</circle></area><headline>");
+        count0 +=  sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-8\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
+        count0 +=  sprintf(footer,"%s","</headline></info></alert>");
+        int total_length = count0;
+/* 
+        *  How to use sprintf to build a string 
+        *  Buffer is an array
+        *  n=sprintf (buffer, "%d plus %d is %d", a, b, a+b);
+        *  where a and b are integers
+        *  n stores how long the string is
+*/
+
+
+
+
+ uint16_t statuscode;
+        int16_t length;
+        int16_t data_length;
+        char url[80];
+        char data[1000];  // changed data from 79 to 1000 because theres a LOT (as in tons) of data in that string
+/////////////////////////
+        
+////////////////////////////////
+          
+         
+
+        
+    break;
+   }
 
     case 'S': {
         Serial.println(F("Creating SERIAL TUBE"));
