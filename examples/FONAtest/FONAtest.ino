@@ -853,23 +853,10 @@ void loop() {
 
 
    case 'Z': {
-    /*
-Suggested Code Sequence from Adafruit for opening a http connection.
-AT+CGDCONT=1,\"IP\",\"<YOUR APN HERE>\",\"0.0.0.0\" // Define PDP context
-AT+CGSOCKCONT=1,\"IP\",\"<YOUR APN HERE>\" // Define PCP socket context
-AT+NETOPEN // Open packet data network
-AT+CHTTPSSTART // Aquire HTTPS stack
-AT+CHTTPSOPSE=\"<YOUR SITE HERE>\",443 // Open HTTPS session
-AT+HTTPSSEND=<LENGTH OF REQUEST> // Tell the SIMCOM you want to send a message of certain length
-GET /url/ HTTP/1.1
-Host: <YOUR SITE>
-// (Any other list of http parameters you want) 
-// Make sure that the length of the request matches what you stated above. 
-AT+CHTTPSSEND // Tell the SIMCOM to send the message.
-// Wait for this from the module
-+CHTTPS: RECV EVENT
-AT+CHTTPSRECV=<length> // Check the response. <length> defines how long the printout is. I normally say something like 1000 and just ignore the garbage. 
-*/
+  /*
+   * https://github.com/adafruit/Adafruit_FONA/pull/81/commits/0332448e79a18ad206cb6e80d23a6d739e62940c 
+   * Combined this links code with Ubidots build setup for Posting
+   */
 // turn HTTPS Stack on
 
   // turn GPRS on
@@ -881,13 +868,9 @@ AT+CHTTPSRECV=<length> // Check the response. <length> defines how long the prin
   Serial.println(F("Starting the HTTPS Stack!"));
   fona.println("AT+CHTTPSSTART");
 
-  
-//https://viper.response.epa.gov/CAP/post
-//fona.write("AT+CHTTPSOPSE=https://viper.response.epa.gov/CAP/post,,2");
-//fona.write("AT+CHTTPSSEND=1000");
-//fona.write("AT+CHTTPSSEND");
+ 
 char post[] =  "POST /CAP/post HTTP/1.1";
-char host[] = "https://viper.response.epa.gov/CAP/post";
+char host[] = "Host: https://viper.response.epa.gov/CAP/post";
 char connection[] = "Connection: Keep-Alive";
 char authorization[] = "Authorization: Basic Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh"; //encoded my username and password in base 64
 char xml[1000];
@@ -909,6 +892,8 @@ int unit = 1;
         sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-8\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
         sprintf(footer,"%s","</headline></info></alert>");
         count = sprintf(allData,"%s%s%s",header,postS,footer);
+        char content_length[30];
+        sprintf(content_length,"Content-length: %s", count); 
 /* 
         *  How to use sprintf to build a string 
         *  Buffer is an array
@@ -925,11 +910,7 @@ int unit = 1;
         int16_t data_length;
         char url[80];
         char data[1000];  // changed data from 79 to 1000 because theres a LOT (as in tons) of data in that string
-/////////////////////////
-        
-////////////////////////////////
-          
-         
+
 
         
     break;
