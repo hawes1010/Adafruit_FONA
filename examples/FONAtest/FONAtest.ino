@@ -1,3 +1,5 @@
+#include <HTTPS_VIPER.h>
+
 /***************************************************
   This is an example for our Adafruit FONA Cellular Module
 
@@ -869,10 +871,10 @@ void loop() {
   fona.println("AT+CHTTPSSTART");
 
  
-char post[] =  "POST /CAP/post HTTP/1.1\r";
-char host[] = "Host: https://viper.response.epa.gov/CAP/post\r";
-char connection[] = "Connection: Keep-Alive\r";
-char authorization[] = "Authorization: Basic Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh\r"; //encoded my username and password in base 64
+char post[] =  "POST /CAP/post HTTP/1.1\n";
+char host[] = "Host: https://viper.response.epa.gov/CAP/post\n";
+char connection[] = "Connection: Keep-Alive\n";
+char authorization[] = "Authorization: Basic Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh\n"; //encoded my username and password in base 64
 char xml[1000];
 char http_header[300];
 
@@ -903,19 +905,7 @@ int unit = 1;
         *  n=sprintf (buffer, "%d plus %d is %d", a, b, a+b);
         *  where a and b are integers
         *  n stores how long the string is
-*/
-
-
-
-
- uint16_t statuscode;
-        int16_t length;
-        int16_t data_length;
-        char url[80];
-        char data[1000];  // changed data from 79 to 1000 because theres a LOT (as in tons) of data in that string
-
-
-        
+*/        
     break;
    }
 
