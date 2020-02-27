@@ -29,8 +29,8 @@ the commented section below at the end of the setup() function.
 */
 #include "Adafruit_FONA.h"
 #include "base64.hpp"
-#define FONA_RX 2
-#define FONA_TX 3
+#define FONA_RX 0
+#define FONA_TX 1
 #define FONA_RST 4
 static int identnum = 1;
 
@@ -41,16 +41,15 @@ char replybuffer[255];
 // (because softserial isnt supported) comment out the following three lines 
 // and uncomment the HardwareSerial line
 #include <SoftwareSerial.h>
-SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
-SoftwareSerial *fonaSerial = &fonaSS;
-
+//SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
+//SoftwareSerial *fonaSerial = &fonaSS;
 // Hardware serial is also possible!
-//  HardwareSerial *fonaSerial = &Serial1;
+ HardwareSerial *fonaSerial = &Serial1;
 
 // Use this for FONA 800 and 808s
-Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
+//Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 // Use this one for FONA 3G
-//Adafruit_FONA_3G fona = Adafruit_FONA_3G(FONA_RST);
+Adafruit_FONA_3G fona = Adafruit_FONA_3G(FONA_RST);
 
 uint8_t readline(char *buff, uint8_t maxbuff, uint16_t timeout = 0);
 
@@ -860,26 +859,26 @@ void loop() {
    * Combined this links code with Ubidots build setup for Posting
    */
    HardwareSerial *fonaSerial = &Serial1;
-    if (! fona.begin(*fonaSerial)) {
-    Serial.println(F("Couldn't find FONA"));
+    //if (! fona.begin(*fonaSerial)) {
+    //Serial.println(F("Couldn't find FONA"));
     //while (1);
-  }
+ // }
 // turn HTTPS Stack on
 HTTPS_VIPER http = HTTPS_VIPER(FONA_RST);
 http.init(*fonaSerial);
   // turn GPRS on
-  if (!fona.enableGPRS(true))
-    Serial.println(F("Failed to turn on the 3G GPRS module"));
-  else
-    Serial.println(F("We have turned on the GPRS Function for the 3G FONA module"));
+ // if (!fona.enableGPRS(true))
+ //   Serial.println(F("Failed to turn on the 3G GPRS module"));
+//  else
+//    Serial.println(F("We have turned on the GPRS Function for the 3G FONA module"));
     
   http.start_HTTP();
  Serial.println(http.is_error());
  
 char post[] =  "POST /CAP/post HTTP/1.1\n";
-char host[] = "Host: https://viper.response.epa.gov/CAP/post\n";
+char host[] = "https://viper.response.epa.gov/CAP/post\n";
 char connection[] = "Connection: Keep-Alive\n";
-char authorization[] = "Authorization: Basic Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh\n"; //encoded my username and password in base 64
+char authorization[] = "Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh"; //encoded my username and password in base 64
 char port[] = "6991";
 char xml[1000];
 char http_header[300];
@@ -893,7 +892,8 @@ char http_header[300];
           char sourceS[30];
           char footer[30];
           char header[500];
-          
+           
+
 int unit = 1;
          int count;
         sprintf(ident,"%i",identnum);
@@ -906,12 +906,16 @@ int unit = 1;
         char content_length[30];
         sprintf(content_length,"Content-length: %s\r", count);
         sprintf(http_header, "%s%s%s%s%s", post,host,connection,authorization,content_length);
+        Serial.println("H");
        char* total_post = http.build_POST(host,authorization,allData);
+        Serial.println("H0");
         delay(1);
         http.Open_HTTP(host,port);
-         Serial.println(http.is_error());
+         Serial.println("H1");
+        Serial.println(http.is_error());
         delay(10);
         http.Send_HTTP(total_post);
+          Serial.println("H2");
          Serial.println(http.is_error());
         
 /*     
