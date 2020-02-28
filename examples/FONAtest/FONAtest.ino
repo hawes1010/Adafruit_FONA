@@ -858,13 +858,13 @@ void loop() {
    * https://github.com/adafruit/Adafruit_FONA/pull/81/commits/0332448e79a18ad206cb6e80d23a6d739e62940c 
    * Combined this links code with Ubidots build setup for Posting
    */
-   HardwareSerial *fonaSerial = &Serial1;
+ //  HardwareSerial *fonaSerial = &Serial1;
     //if (! fona.begin(*fonaSerial)) {
     //Serial.println(F("Couldn't find FONA"));
     //while (1);
  // }
 // turn HTTPS Stack on
-HTTPS_VIPER http = HTTPS_VIPER(FONA_RST);
+HTTPS_VIPER http = HTTPS_VIPER(/*FONA_RST*/);
 http.init(*fonaSerial);
   // turn GPRS on
  // if (!fona.enableGPRS(true))
@@ -883,8 +883,8 @@ char port[] = "6991";
 char xml[1000];
 char http_header[300];
 
-
- char allData[3000];
+char* totalpost;
+ char allData[1000];
           char str_values[10];
           char postS[500];
           char tempS[100];
@@ -907,14 +907,14 @@ int unit = 1;
         sprintf(content_length,"Content-length: %s\r", count);
         sprintf(http_header, "%s%s%s%s%s", post,host,connection,authorization,content_length);
         Serial.println("H");
-       char* total_post = http.build_POST(host,authorization,allData);
+       totalpost = http.build_POST(host,authorization,allData);
         Serial.println("H0");
         delay(1);
         http.Open_HTTP(host,port);
          Serial.println("H1");
         Serial.println(http.is_error());
         delay(10);
-        http.Send_HTTP(total_post);
+        http.Send_HTTP(totalpost);
           Serial.println("H2");
          Serial.println(http.is_error());
         
