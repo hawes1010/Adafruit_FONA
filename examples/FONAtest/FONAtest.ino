@@ -26,7 +26,7 @@ Note that if you need to set a GPRS APN, username, and password scroll down to
 the commented section below at the end of the setup() function.
 */
 #include "Adafruit_FONA.h"
-#include "base64.hpp"
+//#include "base64.hpp"
 #define FONA_RX 2
 #define FONA_TX 3
 #define FONA_RST 4
