@@ -1,3 +1,5 @@
+#include <HTTPS_VIPER.h>
+
 /***************************************************
   This is an example for our Adafruit FONA Cellular Module
 
@@ -26,9 +28,10 @@ Note that if you need to set a GPRS APN, username, and password scroll down to
 the commented section below at the end of the setup() function.
 */
 #include "Adafruit_FONA.h"
+
 //#include "base64.hpp"
-#define FONA_RX 2
-#define FONA_TX 3
+#define FONA_RX 0
+#define FONA_TX 1
 #define FONA_RST 4
 static int identnum = 1;
 
@@ -39,16 +42,15 @@ char replybuffer[255];
 // (because softserial isnt supported) comment out the following three lines 
 // and uncomment the HardwareSerial line
 #include <SoftwareSerial.h>
-SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
-SoftwareSerial *fonaSerial = &fonaSS;
-
+//SoftwareSerial fonaSS = SoftwareSerial(FONA_TX, FONA_RX);
+//SoftwareSerial *fonaSerial = &fonaSS;
 // Hardware serial is also possible!
-//  HardwareSerial *fonaSerial = &Serial1;
+ HardwareSerial *fonaSerial = &Serial1;
 
 // Use this for FONA 800 and 808s
-Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
+//Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 // Use this one for FONA 3G
-//Adafruit_FONA_3G fona = Adafruit_FONA_3G(FONA_RST);
+Adafruit_FONA_3G fona = Adafruit_FONA_3G(FONA_RST);
 
 uint8_t readline(char *buff, uint8_t maxbuff, uint16_t timeout = 0);
 
@@ -809,7 +811,7 @@ void loop() {
           sprintf(postS,"%s","");
           sprintf(tempS,"%s","");
           sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD ",unit, ",0,0");  // Can change the zeros to increment in a cascading format to add more devices                                                                         
-          sprintf(postS, "%s%s%s%s%s%s%s%s%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>",0/*GPS*/, "</circle></area><headline>");
+          sprintf(postS, "%s%s%s%s%s%s%s%i%s", "<identifier>", ident, "</identifier>",  "<source>", sourceS, "</source>", "<info><area><circle>",0/*GPS*/, "</circle></area><headline>");
           sprintf(header,"%s","<?xml version=\"1.0\" encoding=\"utf-8\"?><alert xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"urn:oasis:names:tc:emergency:cap:1.1\">");
           sprintf(footer,"%s","</headline></info></alert>");
 
@@ -857,26 +859,33 @@ void loop() {
    * https://github.com/adafruit/Adafruit_FONA/pull/81/commits/0332448e79a18ad206cb6e80d23a6d739e62940c 
    * Combined this links code with Ubidots build setup for Posting
    */
+ //  HardwareSerial *fonaSerial = &Serial1;
+    //if (! fona.begin(*fonaSerial)) {
+    //Serial.println(F("Couldn't find FONA"));
+    //while (1);
+ // }
 // turn HTTPS Stack on
-
+HTTPS_VIPER http = HTTPS_VIPER(/*FONA_RST*/);
+http.init(*fonaSerial);
   // turn GPRS on
-  if (!fona.enableGPRS(true))
-    Serial.println(F("Failed to turn on the 3G GPRS module"));
-  else
-    Serial.println(F("We have turned on the GPRS Function for the 3G FONA module"));
-
-  Serial.println(F("Starting the HTTPS Stack!"));
-  fona.println("AT+CHTTPSSTART");
-
+ // if (!fona.enableGPRS(true))
+ //   Serial.println(F("Failed to turn on the 3G GPRS module"));
+//  else
+//    Serial.println(F("We have turned on the GPRS Function for the 3G FONA module"));
+    
+  http.start_HTTP();
+ Serial.println(http.is_error());
  
-char post[] =  "POST /CAP/post HTTP/1.1\r";
-char host[] = "Host: https://viper.response.epa.gov/CAP/post\r";
-char connection[] = "Connection: Keep-Alive\r";
-char authorization[] = "Authorization: Basic Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh\r"; //encoded my username and password in base 64
+char post[] =  "POST /CAP/post HTTP/1.1\n";
+char host[] = "https://viper.response.epa.gov/CAP/post\n";
+char connection[] = "Connection: Keep-Alive\n";
+char authorization[] = "Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh"; //encoded my username and password in base 64
+char port[] = "6991";
 char xml[1000];
 char http_header[300];
 
- char allData[3000];
+char* totalpost;
+ char allData[1000];
           char str_values[10];
           char postS[500];
           char tempS[100];
@@ -884,9 +893,10 @@ char http_header[300];
           char sourceS[30];
           char footer[30];
           char header[500];
+           
+
 int unit = 1;
          int count;
-         
         sprintf(ident,"%i",identnum);
           ++identnum;
         sprintf(sourceS, "%s%i%s", "EPA-WET-BOARD ",unit, ",0,0");  // Can change the zeros to increment in a cascading format to add more devices                                                                         
@@ -897,25 +907,25 @@ int unit = 1;
         char content_length[30];
         sprintf(content_length,"Content-length: %s\r", count);
         sprintf(http_header, "%s%s%s%s%s", post,host,connection,authorization,content_length);
-/* 
+        Serial.println("H");
+       totalpost = http.build_POST(host,authorization,allData);
+        Serial.println("H0");
+        delay(1);
+        http.Open_HTTP(host,port);
+         Serial.println("H1");
+        Serial.println(http.is_error());
+        delay(10);
+        http.Send_HTTP(totalpost);
+          Serial.println("H2");
+         Serial.println(http.is_error());
+        
+/*     
         *  How to use sprintf to build a string 
         *  Buffer is an array
         *  n=sprintf (buffer, "%d plus %d is %d", a, b, a+b);
         *  where a and b are integers
         *  n stores how long the string is
-*/
-
-
-
-
- uint16_t statuscode;
-        int16_t length;
-        int16_t data_length;
-        char url[80];
-        char data[1000];  // changed data from 79 to 1000 because theres a LOT (as in tons) of data in that string
-
-
-        
+*/        
     break;
    }
 
