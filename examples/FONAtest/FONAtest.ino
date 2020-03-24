@@ -879,7 +879,7 @@ char post[] =  "POST /CAP/post HTTP/1.1\n";
 char host[] = "https://viper.response.epa.gov/CAP/post\n";
 char connection[] = "Connection: Keep-Alive\n";
 char authorization[] = "Y29sbGllci5qYW1lc0BlcGEuZ292OldldGJvYXJkdGVhbTEh"; //encoded my username and password in base 64
-char port[] = "6991";
+char port[] = "443";
 char xml[1000];
 char http_header[300];
 
