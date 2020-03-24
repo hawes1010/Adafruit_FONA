@@ -37,7 +37,7 @@ Adafruit_FONA::Adafruit_FONA(int8_t rst)
   apnusername = 0;
   apnpassword = 0;
   mySerial = 0;
-  httpsredirect = false;
+  httpsredirect = true;
   useragent = F("FONA");
   ok_reply = F("OK");
 }
