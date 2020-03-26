@@ -863,14 +863,18 @@ void loop() {
     //while (1);
  // }
 // turn HTTPS Stack on
+char *response;
 HTTPS_VIPER http = HTTPS_VIPER();
 http.init(*fonaSerial);
   // turn GPRS on
- if (!fona.enableGPRS(true))
-   Serial.println(F("Failed to turn on the 3G GPRS module"));
- else
-   Serial.println(F("We have turned on the GPRS Function for the 3G FONA module"));
-    
+// if (!fona.enableGPRS(true))
+//   Serial.println(F("Failed to turn on the 3G GPRS module"));
+// else
+//   Serial.println(F("We have turned on the GPRS Function for the 3G FONA module"));
+    http.check_GPRS();
+    response = http.read_FONA();
+    Serial.print("FONA RESPONSE----->");
+    Serial.println(response);
   http.start_HTTP();
  Serial.println(http.is_error());
  
@@ -948,7 +952,15 @@ void flushSerial() {
   while (Serial.available())
     Serial.read();
 }
-
+void readFona(){
+while (Serial1.available()){
+ char a = Serial1.read();
+ Serial.print(a);
+ 
+}
+Serial.println("");
+  
+}
 char readBlocking() {
   while (!Serial.available());
   return Serial.read();
